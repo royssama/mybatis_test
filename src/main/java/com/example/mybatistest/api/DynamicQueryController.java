@@ -1,13 +1,14 @@
 package com.example.mybatistest.api;
 
+import com.example.mybatistest.dto.BasicDtoRequest;
+import com.example.mybatistest.dto.DatasetDtoRequest;
 import com.example.mybatistest.service.DynamicQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.Map;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "MyBatis XML sample", description = "Dynamic column select example")
 @RestController
@@ -27,5 +28,17 @@ public class DynamicQueryController {
             @RequestParam(defaultValue = "true") boolean includeScore
     ) {
         return dynamicQueryService.selectTestData(active, includeScore);
+    }
+
+    @Operation(summary = "Select test data use dataset MyBatis XML")
+    @PostMapping("/Basic-select")
+    public Map<String, Object> selectBasicColumns(@Valid @RequestBody BasicDtoRequest dto) {
+        return dynamicQueryService.selectBasicColumns(dto);
+    }
+
+    @Operation(summary = "Select test data use dataset MyBatis XML")
+    @PostMapping("/dataset-select")
+    public Map<String, Object> selectDatasetColumns(@Valid @RequestBody DatasetDtoRequest dto) {
+        return dynamicQueryService.selectDatasetColumns(dto);
     }
 }

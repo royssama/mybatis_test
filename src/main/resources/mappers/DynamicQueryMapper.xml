@@ -16,5 +16,23 @@
         <if test="includeTraceColumn">
             , 'MYBATIS_XML' AS querySource
         </if>
+        FROM dual
+    </select>
+
+    <select id="selectBasicColumns" parameterType="com.example.mybatistest.dto.BasicDtoRequest" resultType="map">
+        SELECT
+        <foreach collection="columns" item="column" separator=",">
+            ${column.expression} AS ${column.alias}
+        </foreach>
+        FROM dual
+    </select>
+
+
+    <select id="selectDatasetColumns" parameterType="com.example.mybatistest.dto.DatasetDtoRequest" resultType="map">
+        SELECT
+        <foreach collection="columns" item="column" separator=",">
+            ${column.expression} AS ${column.alias}
+        </foreach>
+        FROM dual
     </select>
 </mapper>

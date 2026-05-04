@@ -2,6 +2,8 @@ package com.example.mybatistest.api;
 
 import com.example.mybatistest.dto.BasicDtoRequest;
 import com.example.mybatistest.dto.DatasetDtoRequest;
+import com.example.mybatistest.dto.IDataSetDtoRequest;
+import com.example.mybatistest.dto.IDataSetDtoResponse;
 import com.example.mybatistest.service.DynamicQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,5 +42,11 @@ public class DynamicQueryController {
     @PostMapping("/dataset-select")
     public Map<String, Object> selectDatasetColumns(@Valid @RequestBody DatasetDtoRequest dto) {
         return dynamicQueryService.selectDatasetColumns(dto);
+    }
+
+    @Operation(summary = "DTO request converted to NEXCORE IDataSet style flow")
+    @PostMapping("/idata-set-select")
+    public IDataSetDtoResponse selectIDataSetColumns(@Valid @RequestBody IDataSetDtoRequest dto) {
+        return dynamicQueryService.selectIDataSetColumns(dto);
     }
 }

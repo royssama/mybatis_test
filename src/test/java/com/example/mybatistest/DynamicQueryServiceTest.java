@@ -2,6 +2,8 @@ package com.example.mybatistest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.mybatistest.dto.IDataSetDtoRequest;
+import com.example.mybatistest.dto.IDataSetDtoResponse;
 import com.example.mybatistest.service.DynamicQueryService;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -31,5 +33,23 @@ class DynamicQueryServiceTest {
 
         assertThat(result).containsEntry("STATUSNAME", "INACTIVE");
         assertThat(result).doesNotContainKey("SCORE");
+    }
+
+    @Test
+    void selectIDataSetColumnsConvertsDtoThroughDataSetFlow() {
+        IDataSetDtoRequest request = new IDataSetDtoRequest();
+        request.setTest01("A");
+        request.setTest02("B");
+        request.setTest03("C");
+        request.setActive(true);
+        request.setIncludeScore(true);
+
+        IDataSetDtoResponse response = dynamicQueryService.selectIDataSetColumns(request);
+
+        assertThat(response.getFields()).containsEntry("test01", "A");
+        assertThat(response.getColumns()).hasSize(4);
+        assertThat(response.getRow()).containsEntry("USERID", "U001");
+        assertThat(response.getRow()).containsEntry("STATUSNAME", "ACTIVE");
+        assertThat(response.getRow()).containsEntry("SCORE", 100);
     }
 }

@@ -2,6 +2,8 @@ package com.example.mybatistest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.mybatistest.dto.DataSetAdapterRequest;
+import com.example.mybatistest.dto.DataSetAdapterResponse;
 import com.example.mybatistest.dto.IDataSetDtoRequest;
 import com.example.mybatistest.dto.IDataSetDtoResponse;
 import com.example.mybatistest.service.DynamicQueryService;
@@ -51,5 +53,23 @@ class DynamicQueryServiceTest {
         assertThat(response.getRow()).containsEntry("USERID", "U001");
         assertThat(response.getRow()).containsEntry("STATUSNAME", "ACTIVE");
         assertThat(response.getRow()).containsEntry("SCORE", 100);
+    }
+
+    @Test
+    void selectAdapterDataSetColumnsUsesProjectOwnedDataSetWithoutNexcoreJar() {
+        DataSetAdapterRequest request = new DataSetAdapterRequest();
+        request.setTest01("A");
+        request.setTest02("B");
+        request.setTest03("C");
+        request.setActive(false);
+        request.setIncludeScore(false);
+
+        DataSetAdapterResponse response = dynamicQueryService.selectAdapterDataSetColumns(request);
+
+        assertThat(response.getFields()).containsEntry("test01", "A");
+        assertThat(response.getColumns()).hasSize(3);
+        assertThat(response.getRow()).containsEntry("USERID", "U001");
+        assertThat(response.getRow()).containsEntry("STATUSNAME", "INACTIVE");
+        assertThat(response.getRow()).doesNotContainKey("SCORE");
     }
 }

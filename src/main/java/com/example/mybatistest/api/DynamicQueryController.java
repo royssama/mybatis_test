@@ -1,6 +1,8 @@
 package com.example.mybatistest.api;
 
 import com.example.mybatistest.dto.BasicDtoRequest;
+import com.example.mybatistest.dto.DataSetAdapterRequest;
+import com.example.mybatistest.dto.DataSetAdapterResponse;
 import com.example.mybatistest.dto.DatasetDtoRequest;
 import com.example.mybatistest.dto.IDataSetDtoRequest;
 import com.example.mybatistest.dto.IDataSetDtoResponse;
@@ -48,5 +50,11 @@ public class DynamicQueryController {
     @PostMapping("/idata-set-select")
     public IDataSetDtoResponse selectIDataSetColumns(@Valid @RequestBody IDataSetDtoRequest dto) {
         return dynamicQueryService.selectIDataSetColumns(dto);
+    }
+
+    @Operation(summary = "DTO request converted to project-owned DataSetAdapter flow")
+    @PostMapping("/adapter-dataset-select")
+    public DataSetAdapterResponse selectAdapterDataSetColumns(@Valid @RequestBody DataSetAdapterRequest dto) {
+        return dynamicQueryService.selectAdapterDataSetColumns(dto);
     }
 }

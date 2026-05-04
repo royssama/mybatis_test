@@ -1,7 +1,11 @@
 package com.example.mybatistest.service;
 
 import com.example.mybatistest.dto.BasicDtoRequest;
+import com.example.mybatistest.dataset.DataSetAdapter;
+import com.example.mybatistest.dataset.MapDataSetAdapter;
 import com.example.mybatistest.dto.DatasetDtoRequest;
+import com.example.mybatistest.dto.DataSetAdapterRequest;
+import com.example.mybatistest.dto.DataSetAdapterResponse;
 import com.example.mybatistest.dto.DynamicQueryRequest;
 import com.example.mybatistest.dto.IDataSetDtoRequest;
 import com.example.mybatistest.dto.IDataSetDtoResponse;
@@ -112,6 +116,18 @@ public class DynamicQueryService {
         return toIDataSetDtoResponse(processedDataSet, row);
     }
 
+    public DataSetAdapterResponse selectAdapterDataSetColumns(DataSetAdapterRequest dto) {
+        DataSetAdapter requestDataSet = toDataSetAdapter(dto);
+
+        // nexcore-framework.jar 없이도 같은 처리 흐름을 유지하는 프로젝트 자체 Dataset 로직이다.
+        DataSetAdapter processedDataSet = runAdapterDataSetLogic(requestDataSet);
+
+        DatasetDtoRequest mapperRequest = toDatasetDtoRequest(processedDataSet);
+        Map<String, Object> row = dynamicQueryMapper.selectDatasetColumns(mapperRequest);
+
+        return toDataSetAdapterResponse(processedDataSet, row);
+    }
+
     private IDataSet toIDataSet(IDataSetDtoRequest dto) {
         IDataSet dataSet = new SimpleIDataSet();
         dataSet.putField("test01", dto.getTest01());
@@ -162,6 +178,55 @@ public class DynamicQueryService {
 
     private IDataSetDtoResponse toIDataSetDtoResponse(IDataSet dataSet, Map<String, Object> row) {
         IDataSetDtoResponse response = new IDataSetDtoResponse();
+        response.setFields(dataSet.getFields());
+        response.setColumns(dataSet.getRows("columns"));
+        response.setRow(row);
+        return response;
+    }
+
+    private DataSetAdapter toDataSetAdapter(DataSetAdapterRequest dto) {
+        DataSetAdapter dataSet = new MapDataSetAdapter();
+        dataSet.putField("test01", dto.getTest01());
+        dataSet.putField("test02", dto.getTest02());
+        dataSet.putField("test03", dto.getTest03());
+        dataSet.putField("active", dto.isActive());
+        dataSet.putField("includeScore", dto.isIncludeScore());
+        return dataSet;
+    }
+
+    private DataSetAdapter runAdapterDataSetLogic(DataSetAdapter source) {
+        DataSetAdapter target = new MapDataSetAdapter();
+        target.getFields().putAll(source.getFields());
+
+        boolean active = Boolean.TRUE.equals(source.getField("active"));
+        boolean includeScore = Boolean.TRUE.equals(source.getField("includeScore"));
+        target.addRow("columns", dataSetColumn("userId", "'U001'"));
+        target.addRow("columns", dataSetColumn("userName", "'Test User'"));
+        target.addRow("columns", dataSetColumn("statusName", active ? "'ACTIVE'" : "'INACTIVE'"));
+
+        if (includeScore) {
+            target.addRow("columns", dataSetColumn("score", "100"));
+        }
+
+        return target;
+    }
+
+    private DatasetDtoRequest toDatasetDtoRequest(DataSetAdapter dataSet) {
+        DatasetDtoRequest dto = new DatasetDtoRequest();
+        dto.setTest01(String.valueOf(dataSet.getField("test01")));
+        dto.setTest02(String.valueOf(dataSet.getField("test02")));
+        dto.setTest03(String.valueOf(dataSet.getField("test03")));
+
+        List<Map<String, String>> columns = new ArrayList<>();
+        for (Map<String, Object> row : dataSet.getRows("columns")) {
+            columns.add(column(String.valueOf(row.get("alias")), String.valueOf(row.get("expression"))));
+        }
+        dto.setColumns(columns);
+        return dto;
+    }
+
+    private DataSetAdapterResponse toDataSetAdapterResponse(DataSetAdapter dataSet, Map<String, Object> row) {
+        DataSetAdapterResponse response = new DataSetAdapterResponse();
         response.setFields(dataSet.getFields());
         response.setColumns(dataSet.getRows("columns"));
         response.setRow(row);

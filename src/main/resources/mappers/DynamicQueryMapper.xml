@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatistest.mapper.DynamicQueryMapper">
+
+    <sql id="dynamicColumns">
+        <foreach collection="columns" item="column" separator=",">
+            ${column.expression} AS ${column.alias}
+        </foreach>
+    </sql>
+
+    <select id="selectDynamicColumns" parameterType="com.example.mybatistest.dto.DynamicQueryRequest" resultType="map">
+        SELECT
+        <include refid="dynamicColumns" />
+        <if test="includeTraceColumn">
+            , 'MYBATIS_XML' AS querySource
+        </if>
+        FROM dual
+    </select>
+
+    <select id="selectBasicColumns" parameterType="com.example.mybatistest.dto.BasicDtoRequest" resultType="map">
+        SELECT
+        <foreach collection="columns" item="column" separator=",">
+            ${column.expression} AS ${column.alias}
+        </foreach>
+        FROM dual
+    </select>
+
+
+    <select id="selectDatasetColumns" parameterType="com.example.mybatistest.dto.DatasetDtoRequest" resultType="map">
+        SELECT
+        <foreach collection="columns" item="column" separator=",">
+            ${column.expression} AS ${column.alias}
+        </foreach>
+        FROM dual
+    </select>
+</mapper>

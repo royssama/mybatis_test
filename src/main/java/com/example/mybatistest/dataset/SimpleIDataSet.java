@@ -36,7 +36,6 @@ public class SimpleIDataSet implements IDataSet {
 
     @Override
     public void putFieldMap(Map<String, Object> fieldMap) {
-        fields.clear();
         fields.putAll(fieldMap);
     }
 

@@ -1,6 +1,7 @@
 package com.example.mybatistest.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.mybatistest.dto.BasicDtoRequest;
 import com.example.mybatistest.dataset.DataSetAdapter;
@@ -36,7 +37,8 @@ public class DynamicQueryService {
 
     public DynamicQueryService(DynamicQueryMapper dynamicQueryMapper, ObjectMapper objectMapper) {
         this.dynamicQueryMapper = dynamicQueryMapper;
-        this.objectMapper = objectMapper;
+        this.objectMapper = objectMapper.copy()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public Map<String, Object> selectTestData(boolean active, boolean includeScore) {

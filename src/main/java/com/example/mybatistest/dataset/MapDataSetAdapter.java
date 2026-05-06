@@ -32,7 +32,6 @@ public class MapDataSetAdapter implements DataSetAdapter {
 
     @Override
     public void putFieldMap(Map<String, Object> fieldMap) {
-        fields.clear();
         fields.putAll(fieldMap);
     }
 

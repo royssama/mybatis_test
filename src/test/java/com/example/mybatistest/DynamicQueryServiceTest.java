@@ -119,6 +119,35 @@ class DynamicQueryServiceTest {
     }
 
     @Test
+    void putFieldMapMergesListValuesWithoutDroppingDtoFields() {
+        IDataSetDtoRequest request = new IDataSetDtoRequest();
+        request.setTest01("A");
+        request.setTest02("B");
+        request.setTest03("C");
+        request.setActive(true);
+        request.setIncludeScore(false);
+
+        IDataSet req = dynamicQueryService.toDataSetAdapter(request);
+        List<Map<String, Object>> list = List.of(Map.of("value", "data001-row"));
+        List<Map<String, Object>> list2 = List.of(Map.of("value", "data002-row"));
+        Map<String, Object> paraMap = new HashMap<>();
+        paraMap.put("data001", list);
+        paraMap.put("data002", list2);
+
+        req.putFieldMap(paraMap);
+        IDataSetDtoRequest converted = dynamicQueryService.toDto(req, IDataSetDtoRequest.class);
+
+        assertThat(req.getFieldMap())
+                .containsEntry("TEST01", "A")
+                .containsEntry("TEST02", "B")
+                .containsEntry("data001", list)
+                .containsEntry("data002", list2);
+        assertThat(converted.getTest01()).isEqualTo("A");
+        assertThat(converted.getTest02()).isEqualTo("B");
+        assertThat(converted.getTest03()).isEqualTo("C");
+    }
+
+    @Test
     void convertsListMapResultToRecordDataSet() {
         List<Map<String, Object>> sList = List.of(
                 Map.of("test001", "A", "test002", "B"),

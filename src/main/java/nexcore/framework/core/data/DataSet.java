@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Example-only DtaSet implementation. Replace with the real NEXCORE class when the jar is available.
+ * Example-only DataSet implementation. Replace with the real NEXCORE class when the jar is available.
  */
-public class DtaSet implements IDataSet {
+public class DataSet implements IDataSet {
 
     private final Map<String, Object> fields = new LinkedHashMap<>();
     private final Map<String, IRecordSet> recordSets = new LinkedHashMap<>();

@@ -2,7 +2,7 @@ package com.example.mybatistest.service;
 
 import com.example.mybatistest.dto.BasicDtoRequest;
 import com.example.mybatistest.dataset.DataSetAdapter;
-import com.example.mybatistest.dataset.MapDtaSetAdapter;
+import com.example.mybatistest.dataset.MapDataSetAdapter;
 import com.example.mybatistest.dataset.MapOnlineContextAdapter;
 import com.example.mybatistest.dataset.MapRecordSetAdapter;
 import com.example.mybatistest.dataset.OnlineContextAdapter;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import nexcore.framework.core.data.DtaSet;
+import nexcore.framework.core.data.DataSet;
 import nexcore.framework.core.data.IDataSet;
 import nexcore.framework.core.data.IOnlineContext;
 import nexcore.framework.core.data.IRecordSet;
@@ -117,7 +117,7 @@ public class DynamicQueryService {
         IDataSet requestDataSet = onlineContext.getDataSet();
 
         // nexcore-framework.jar 사용 시 기존 ServiceImpl에서 흔히 보이는 4개 타입 흐름 예제:
-        // IOnlineContext -> IDataSet(DtaSet 구현체) -> IRecordSet -> IDataSet 결과.
+        // IOnlineContext -> IDataSet(DataSet 구현체) -> IRecordSet -> IDataSet 결과.
         IDataSet processedDataSet = runLegacyIDataSetLogic(onlineContext, requestDataSet);
 
         DatasetDtoRequest mapperRequest = toDatasetDtoRequest(processedDataSet);
@@ -130,7 +130,7 @@ public class DynamicQueryService {
         OnlineContextAdapter onlineContext = toAdapterOnlineContext(dto);
         DataSetAdapter requestDataSet = onlineContext.getDataSet();
 
-        // nexcore-framework.jar 없이도 DtaSet/IDataSet/IOnlineContext/IRecordSet 개념을 자체 타입으로 대체한다.
+        // nexcore-framework.jar 없이도 DataSet/IDataSet/IOnlineContext/IRecordSet 개념을 자체 타입으로 대체한다.
         DataSetAdapter processedDataSet = runAdapterDataSetLogic(onlineContext, requestDataSet);
 
         DatasetDtoRequest mapperRequest = toDatasetDtoRequest(processedDataSet);
@@ -140,7 +140,7 @@ public class DynamicQueryService {
     }
 
     private IOnlineContext toNexcoreOnlineContext(IDataSetDtoRequest dto) {
-        IDataSet dataSet = new DtaSet();
+        IDataSet dataSet = new DataSet();
         dataSet.putField("test01", dto.getTest01());
         dataSet.putField("test02", dto.getTest02());
         dataSet.putField("test03", dto.getTest03());
@@ -155,7 +155,7 @@ public class DynamicQueryService {
     }
 
     private IDataSet runLegacyIDataSetLogic(IOnlineContext context, IDataSet source) {
-        IDataSet target = new DtaSet();
+        IDataSet target = new DataSet();
         Map<String, Object> paramMap = new LinkedHashMap<>(source.getFieldMap());
         paramMap.put("transactionId", context.getAttribute("transactionId"));
         target.putFieldMap(paramMap);
@@ -212,7 +212,7 @@ public class DynamicQueryService {
     }
 
     private OnlineContextAdapter toAdapterOnlineContext(DataSetAdapterRequest dto) {
-        DataSetAdapter dataSet = new MapDtaSetAdapter();
+        DataSetAdapter dataSet = new MapDataSetAdapter();
         dataSet.putField("test01", dto.getTest01());
         dataSet.putField("test02", dto.getTest02());
         dataSet.putField("test03", dto.getTest03());
@@ -227,7 +227,7 @@ public class DynamicQueryService {
     }
 
     private DataSetAdapter runAdapterDataSetLogic(OnlineContextAdapter context, DataSetAdapter source) {
-        DataSetAdapter target = new MapDtaSetAdapter();
+        DataSetAdapter target = new MapDataSetAdapter();
         Map<String, Object> paramMap = new LinkedHashMap<>(source.getFieldMap());
         paramMap.put("transactionId", context.getAttribute("transactionId"));
         target.putFieldMap(paramMap);

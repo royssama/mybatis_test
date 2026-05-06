@@ -9,7 +9,7 @@ import com.example.mybatistest.dto.IDataSetDtoResponse;
 import com.example.mybatistest.service.DynamicQueryService;
 import java.util.HashMap;
 import java.util.Map;
-import nexcore.framework.core.data.DtaSet;
+import nexcore.framework.core.data.DataSet;
 import nexcore.framework.core.data.IDataSet;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +80,7 @@ class DynamicQueryServiceTest {
 
     @Test
     void dataSetSupportsAsIsStringAssignments() {
-        IDataSet req = new DtaSet();
+        IDataSet req = new DataSet();
         req.putField("test", "A");
         req.addRow("records", Map.of("test002", "B"));
 

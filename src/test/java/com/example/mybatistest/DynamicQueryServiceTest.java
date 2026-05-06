@@ -84,11 +84,11 @@ class DynamicQueryServiceTest {
     void dataSetSupportsAsIsStringAssignments() {
         IDataSet req = new DataSet();
         req.putField("test", "A");
-        req.addRow("records", Map.of("test002", "B"));
+        IDataSet record = dynamicQueryService.toRecordDataSet(List.of(Map.of("test002", "B")));
 
         String test01 = req.getField("test");
         Map<String, String> wkMap = new HashMap<>();
-        wkMap.put("test002", req.getRecord(0).get("test002"));
+        wkMap.put("test002", record.getRecord(0).get("test002"));
 
         assertThat(test01).isEqualTo("A");
         assertThat(wkMap).containsEntry("test002", "B");

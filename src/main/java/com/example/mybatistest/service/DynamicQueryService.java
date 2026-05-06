@@ -17,6 +17,8 @@ import com.example.mybatistest.dto.DynamicQueryRequest;
 import com.example.mybatistest.dto.IDataSetDtoRequest;
 import com.example.mybatistest.dto.IDataSetDtoResponse;
 import com.example.mybatistest.mapper.DynamicQueryMapper;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -179,7 +181,7 @@ public class DynamicQueryService {
     public IDataSet toRecordDataSet(List<Map<String, Object>> sList) {
         IDataSet record = new DataSet();
         for (Map<String, Object> sourceRow : sList) {
-            record.addRow("records", toRecordRow(sourceRow));
+            addRecordRow(record, "records", toRecordRow(sourceRow));
         }
         return record;
     }
@@ -187,7 +189,7 @@ public class DynamicQueryService {
     public IRecordSet toRecordSet(List<Map<String, Object>> sList) {
         IDataSet record = new DataSet();
         for (Map<String, Object> sourceRow : sList) {
-            record.addRow("records", toRecordRow(sourceRow));
+            addRecordRow(record, "records", toRecordRow(sourceRow));
         }
         return record.getRecordSet("records");
     }
@@ -257,17 +259,32 @@ public class DynamicQueryService {
 
         boolean active = Boolean.TRUE.equals(paramMap.get("active"));
         boolean includeScore = Boolean.TRUE.equals(paramMap.get("includeScore"));
-        target.addRow("columns", dataSetColumn("userId", "'U001'"));
-        target.addRow("columns", dataSetColumn("userName", "'Test User'"));
-        target.addRow("columns", dataSetColumn("statusName", active ? "'ACTIVE'" : "'INACTIVE'"));
+        addRecordRow(target, "columns", dataSetColumn("userId", "'U001'"));
+        addRecordRow(target, "columns", dataSetColumn("userName", "'Test User'"));
+        addRecordRow(target, "columns", dataSetColumn("statusName", active ? "'ACTIVE'" : "'INACTIVE'"));
 
         if (includeScore) {
-            target.addRow("columns", dataSetColumn("score", "100"));
+            addRecordRow(target, "columns", dataSetColumn("score", "100"));
         }
         for (int i = 0; i < target.getRecordCount(); i++) {
             target.getRecord(i).put("recordIndex", String.valueOf(i));
         }
         return target;
+    }
+
+    private void addRecordRow(IDataSet dataSet, String recordSetName, Map<String, String> row) {
+        try {
+            Method addRow = dataSet.getClass().getMethod("addRow", String.class, Map.class);
+            addRow.invoke(dataSet, recordSetName, row);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(
+                    "DataSet implementation must provide a row-add method. "
+                            + "Replace addRecordRow(...) with the row-add API from your NEXCORE jar.",
+                    e
+            );
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Failed to add row to DataSet record set", e);
+        }
     }
 
     private Map<String, String> dataSetColumn(String alias, String expression) {

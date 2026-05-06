@@ -25,8 +25,6 @@ public interface IDataSet {
 
     Map<String, IRecordSet> getRecordSetMap();
 
-    void addRow(String recordSetName, Map<String, String> row);
-
     List<Map<String, String>> getRows(String recordSetName);
 
     Map<String, List<Map<String, String>>> getRecordSets();

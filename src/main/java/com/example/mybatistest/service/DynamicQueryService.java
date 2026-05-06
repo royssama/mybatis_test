@@ -1,5 +1,7 @@
 package com.example.mybatistest.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.mybatistest.dto.BasicDtoRequest;
 import com.example.mybatistest.dataset.DataSetAdapter;
 import com.example.mybatistest.dataset.MapDataSetAdapter;
@@ -30,9 +32,11 @@ import org.springframework.stereotype.Service;
 public class DynamicQueryService {
 
     private final DynamicQueryMapper dynamicQueryMapper;
+    private final ObjectMapper objectMapper;
 
-    public DynamicQueryService(DynamicQueryMapper dynamicQueryMapper) {
+    public DynamicQueryService(DynamicQueryMapper dynamicQueryMapper, ObjectMapper objectMapper) {
         this.dynamicQueryMapper = dynamicQueryMapper;
+        this.objectMapper = objectMapper;
     }
 
     public Map<String, Object> selectTestData(boolean active, boolean includeScore) {
@@ -137,6 +141,83 @@ public class DynamicQueryService {
         Map<String, Object> row = dynamicQueryMapper.selectDatasetColumns(mapperRequest);
 
         return toDataSetAdapterResponse(processedDataSet, row);
+    }
+
+    public List<Map<String, Object>> getList(IDataSetDtoRequest dto) {
+        IDataSet req = toDataSetAdapter(dto);
+
+        // TO-BE에서는 Mapper가 DTO로 조회한 List<Map<String, Object>>를 반환한다고 가정한다.
+        List<Map<String, Object>> sList = List.of(
+                Map.of("test001", req.getField("TEST01"), "test002", "ROW-001"),
+                Map.of("test001", req.getField("TEST02"), "test002", "ROW-002")
+        );
+
+        IDataSet record = toRecordDataSet(sList);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (int i = 0; i < record.getRecordCount(); i++) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.putAll(record.getRecord(i));
+            result.add(row);
+        }
+        return result;
+    }
+
+    public IDataSet toDataSetAdapter(Object dto) {
+        Map<String, Object> result = objectMapper.convertValue(dto, new TypeReference<>() {
+        });
+
+        IDataSet dataSet = new DataSet();
+        for (Map.Entry<String, Object> entry : result.entrySet()) {
+            String replaceKey = convertPropertyNameToUnderscoreName(entry.getKey()).toUpperCase();
+            dataSet.putField(replaceKey, entry.getValue());
+        }
+        return dataSet;
+    }
+
+    public IDataSet toRecordDataSet(List<Map<String, Object>> sList) {
+        IDataSet record = new DataSet();
+        for (Map<String, Object> sourceRow : sList) {
+            Map<String, String> row = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> entry : sourceRow.entrySet()) {
+                row.put(entry.getKey(), entry.getValue() == null ? null : String.valueOf(entry.getValue()));
+            }
+            record.addRow("records", row);
+        }
+        return record;
+    }
+
+    public <T> T toDto(IDataSet req, Class<T> dtoType) {
+        Map<String, Object> dtoMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : req.getFieldMap().entrySet()) {
+            dtoMap.put(convertUnderscoreNameToPropertyName(entry.getKey()), entry.getValue());
+        }
+        return objectMapper.convertValue(dtoMap, dtoType);
+    }
+
+    private String convertPropertyNameToUnderscoreName(String propertyName) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < propertyName.length(); i++) {
+            char current = propertyName.charAt(i);
+            if (Character.isUpperCase(current) && i > 0) {
+                builder.append('_');
+            }
+            builder.append(Character.toUpperCase(current));
+        }
+        return builder.toString();
+    }
+
+    private String convertUnderscoreNameToPropertyName(String underscoreName) {
+        StringBuilder builder = new StringBuilder();
+        boolean upperNext = false;
+        for (char current : underscoreName.toLowerCase().toCharArray()) {
+            if (current == '_') {
+                upperNext = true;
+                continue;
+            }
+            builder.append(upperNext ? Character.toUpperCase(current) : current);
+            upperNext = false;
+        }
+        return builder.toString();
     }
 
     private IOnlineContext toNexcoreOnlineContext(IDataSetDtoRequest dto) {

@@ -7,6 +7,7 @@ import com.example.mybatistest.dto.DataSetAdapterResponse;
 import com.example.mybatistest.dto.IDataSetDtoRequest;
 import com.example.mybatistest.dto.IDataSetDtoResponse;
 import com.example.mybatistest.service.DynamicQueryService;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import nexcore.framework.core.data.DataSet;
@@ -90,5 +91,63 @@ class DynamicQueryServiceTest {
 
         assertThat(test01).isEqualTo("A");
         assertThat(wkMap).containsEntry("test002", "B");
+    }
+
+    @Test
+    void convertsDtoToDataSetAndBackToDto() {
+        IDataSetDtoRequest request = new IDataSetDtoRequest();
+        request.setTest01("A");
+        request.setTest02("B");
+        request.setTest03("C");
+        request.setActive(true);
+        request.setIncludeScore(false);
+
+        IDataSet req = dynamicQueryService.toDataSetAdapter(request);
+        IDataSetDtoRequest converted = dynamicQueryService.toDto(req, IDataSetDtoRequest.class);
+
+        assertThat(req.getFieldMap())
+                .containsEntry("TEST01", "A")
+                .containsEntry("TEST02", "B")
+                .containsEntry("TEST03", "C")
+                .containsEntry("ACTIVE", true)
+                .containsEntry("INCLUDE_SCORE", false);
+        assertThat(converted.getTest01()).isEqualTo("A");
+        assertThat(converted.getTest02()).isEqualTo("B");
+        assertThat(converted.getTest03()).isEqualTo("C");
+        assertThat(converted.isActive()).isTrue();
+        assertThat(converted.isIncludeScore()).isFalse();
+    }
+
+    @Test
+    void convertsListMapResultToRecordDataSet() {
+        List<Map<String, Object>> sList = List.of(
+                Map.of("test001", "A", "test002", "B"),
+                Map.of("test001", "C", "test002", "D")
+        );
+
+        IDataSet record = dynamicQueryService.toRecordDataSet(sList);
+
+        assertThat(record.getRecordCount()).isEqualTo(2);
+        assertThat(record.getRecord(0)).containsEntry("test001", "A");
+        assertThat(record.getRecord(0)).containsEntry("test002", "B");
+        assertThat(record.getRecord(1)).containsEntry("test001", "C");
+    }
+
+    @Test
+    void getListStyleExampleReturnsRecordsFromMapperLikeList() {
+        IDataSetDtoRequest request = new IDataSetDtoRequest();
+        request.setTest01("A");
+        request.setTest02("B");
+        request.setTest03("C");
+        request.setActive(true);
+        request.setIncludeScore(true);
+
+        List<Map<String, Object>> rows = dynamicQueryService.getList(request);
+
+        assertThat(rows).hasSize(2);
+        assertThat(rows.get(0)).containsEntry("test001", "A");
+        assertThat(rows.get(0)).containsEntry("test002", "ROW-001");
+        assertThat(rows.get(1)).containsEntry("test001", "B");
+        assertThat(rows.get(1)).containsEntry("test002", "ROW-002");
     }
 }

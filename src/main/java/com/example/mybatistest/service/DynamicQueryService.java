@@ -2,20 +2,28 @@ package com.example.mybatistest.service;
 
 import com.example.mybatistest.dto.BasicDtoRequest;
 import com.example.mybatistest.dataset.DataSetAdapter;
-import com.example.mybatistest.dataset.MapDataSetAdapter;
+import com.example.mybatistest.dataset.MapDtaSetAdapter;
+import com.example.mybatistest.dataset.MapOnlineContextAdapter;
+import com.example.mybatistest.dataset.MapRecordSetAdapter;
+import com.example.mybatistest.dataset.OnlineContextAdapter;
+import com.example.mybatistest.dataset.RecordSetAdapter;
 import com.example.mybatistest.dto.DatasetDtoRequest;
 import com.example.mybatistest.dto.DataSetAdapterRequest;
 import com.example.mybatistest.dto.DataSetAdapterResponse;
 import com.example.mybatistest.dto.DynamicQueryRequest;
 import com.example.mybatistest.dto.IDataSetDtoRequest;
 import com.example.mybatistest.dto.IDataSetDtoResponse;
-import com.example.mybatistest.dataset.SimpleIDataSet;
 import com.example.mybatistest.mapper.DynamicQueryMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import nexcore.framework.core.data.DtaSet;
 import nexcore.framework.core.data.IDataSet;
+import nexcore.framework.core.data.IOnlineContext;
+import nexcore.framework.core.data.IRecordSet;
+import nexcore.framework.core.data.OnlineContext;
+import nexcore.framework.core.data.RecordSet;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -105,10 +113,12 @@ public class DynamicQueryService {
     }
 
     public IDataSetDtoResponse selectIDataSetColumns(IDataSetDtoRequest dto) {
-        IDataSet requestDataSet = toIDataSet(dto);
+        IOnlineContext onlineContext = toNexcoreOnlineContext(dto);
+        IDataSet requestDataSet = onlineContext.getDataSet();
 
-        // 회사 기존 ServiceImpl이 IDataSet을 받아 처리하는 구간을 예제로 분리했다.
-        IDataSet processedDataSet = runLegacyIDataSetLogic(requestDataSet);
+        // nexcore-framework.jar 사용 시 기존 ServiceImpl에서 흔히 보이는 4개 타입 흐름 예제:
+        // IOnlineContext -> IDataSet(DtaSet 구현체) -> IRecordSet -> IDataSet 결과.
+        IDataSet processedDataSet = runLegacyIDataSetLogic(onlineContext, requestDataSet);
 
         DatasetDtoRequest mapperRequest = toDatasetDtoRequest(processedDataSet);
         Map<String, Object> row = dynamicQueryMapper.selectDatasetColumns(mapperRequest);
@@ -117,10 +127,11 @@ public class DynamicQueryService {
     }
 
     public DataSetAdapterResponse selectAdapterDataSetColumns(DataSetAdapterRequest dto) {
-        DataSetAdapter requestDataSet = toDataSetAdapter(dto);
+        OnlineContextAdapter onlineContext = toAdapterOnlineContext(dto);
+        DataSetAdapter requestDataSet = onlineContext.getDataSet();
 
-        // nexcore-framework.jar 없이도 같은 처리 흐름을 유지하는 프로젝트 자체 Dataset 로직이다.
-        DataSetAdapter processedDataSet = runAdapterDataSetLogic(requestDataSet);
+        // nexcore-framework.jar 없이도 DtaSet/IDataSet/IOnlineContext/IRecordSet 개념을 자체 타입으로 대체한다.
+        DataSetAdapter processedDataSet = runAdapterDataSetLogic(onlineContext, requestDataSet);
 
         DatasetDtoRequest mapperRequest = toDatasetDtoRequest(processedDataSet);
         Map<String, Object> row = dynamicQueryMapper.selectDatasetColumns(mapperRequest);
@@ -128,30 +139,38 @@ public class DynamicQueryService {
         return toDataSetAdapterResponse(processedDataSet, row);
     }
 
-    private IDataSet toIDataSet(IDataSetDtoRequest dto) {
-        IDataSet dataSet = new SimpleIDataSet();
+    private IOnlineContext toNexcoreOnlineContext(IDataSetDtoRequest dto) {
+        IDataSet dataSet = new DtaSet();
         dataSet.putField("test01", dto.getTest01());
         dataSet.putField("test02", dto.getTest02());
         dataSet.putField("test03", dto.getTest03());
         dataSet.putField("active", dto.isActive());
         dataSet.putField("includeScore", dto.isIncludeScore());
-        return dataSet;
+
+        IOnlineContext onlineContext = new OnlineContext();
+        onlineContext.setAttribute("transactionId", "sample.selectIDataSetColumns");
+        onlineContext.setAttribute("clientType", "swagger");
+        onlineContext.setDataSet(dataSet);
+        return onlineContext;
     }
 
-    private IDataSet runLegacyIDataSetLogic(IDataSet source) {
-        IDataSet target = new SimpleIDataSet();
+    private IDataSet runLegacyIDataSetLogic(IOnlineContext context, IDataSet source) {
+        IDataSet target = new DtaSet();
         target.getFields().putAll(source.getFields());
+        target.putField("transactionId", context.getAttribute("transactionId"));
 
         boolean active = Boolean.TRUE.equals(source.getField("active"));
         boolean includeScore = Boolean.TRUE.equals(source.getField("includeScore"));
-        target.addRow("columns", dataSetColumn("userId", "'U001'"));
-        target.addRow("columns", dataSetColumn("userName", "'Test User'"));
-        target.addRow("columns", dataSetColumn("statusName", active ? "'ACTIVE'" : "'INACTIVE'"));
+        IRecordSet columns = new RecordSet("columns");
+        columns.addRow(dataSetColumn("userId", "'U001'"));
+        columns.addRow(dataSetColumn("userName", "'Test User'"));
+        columns.addRow(dataSetColumn("statusName", active ? "'ACTIVE'" : "'INACTIVE'"));
 
         if (includeScore) {
-            target.addRow("columns", dataSetColumn("score", "100"));
+            columns.addRow(dataSetColumn("score", "100"));
         }
 
+        target.putRecordSet("columns", columns);
         return target;
     }
 
@@ -184,30 +203,38 @@ public class DynamicQueryService {
         return response;
     }
 
-    private DataSetAdapter toDataSetAdapter(DataSetAdapterRequest dto) {
-        DataSetAdapter dataSet = new MapDataSetAdapter();
+    private OnlineContextAdapter toAdapterOnlineContext(DataSetAdapterRequest dto) {
+        DataSetAdapter dataSet = new MapDtaSetAdapter();
         dataSet.putField("test01", dto.getTest01());
         dataSet.putField("test02", dto.getTest02());
         dataSet.putField("test03", dto.getTest03());
         dataSet.putField("active", dto.isActive());
         dataSet.putField("includeScore", dto.isIncludeScore());
-        return dataSet;
+
+        OnlineContextAdapter onlineContext = new MapOnlineContextAdapter();
+        onlineContext.setAttribute("transactionId", "sample.selectAdapterDataSetColumns");
+        onlineContext.setAttribute("clientType", "swagger");
+        onlineContext.setDataSet(dataSet);
+        return onlineContext;
     }
 
-    private DataSetAdapter runAdapterDataSetLogic(DataSetAdapter source) {
-        DataSetAdapter target = new MapDataSetAdapter();
+    private DataSetAdapter runAdapterDataSetLogic(OnlineContextAdapter context, DataSetAdapter source) {
+        DataSetAdapter target = new MapDtaSetAdapter();
         target.getFields().putAll(source.getFields());
+        target.putField("transactionId", context.getAttribute("transactionId"));
 
         boolean active = Boolean.TRUE.equals(source.getField("active"));
         boolean includeScore = Boolean.TRUE.equals(source.getField("includeScore"));
-        target.addRow("columns", dataSetColumn("userId", "'U001'"));
-        target.addRow("columns", dataSetColumn("userName", "'Test User'"));
-        target.addRow("columns", dataSetColumn("statusName", active ? "'ACTIVE'" : "'INACTIVE'"));
+        RecordSetAdapter columns = new MapRecordSetAdapter("columns");
+        columns.addRow(dataSetColumn("userId", "'U001'"));
+        columns.addRow(dataSetColumn("userName", "'Test User'"));
+        columns.addRow(dataSetColumn("statusName", active ? "'ACTIVE'" : "'INACTIVE'"));
 
         if (includeScore) {
-            target.addRow("columns", dataSetColumn("score", "100"));
+            columns.addRow(dataSetColumn("score", "100"));
         }
 
+        target.putRecordSet("columns", columns);
         return target;
     }
 

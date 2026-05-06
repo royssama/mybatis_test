@@ -15,6 +15,12 @@ public interface IDataSet {
 
     Map<String, Object> getFields();
 
+    void putRecordSet(String recordSetName, IRecordSet recordSet);
+
+    IRecordSet getRecordSet(String recordSetName);
+
+    Map<String, IRecordSet> getRecordSetMap();
+
     void addRow(String recordSetName, Map<String, Object> row);
 
     List<Map<String, Object>> getRows(String recordSetName);

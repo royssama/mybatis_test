@@ -14,6 +14,12 @@ public interface DataSetAdapter {
 
     Map<String, Object> getFields();
 
+    void putRecordSet(String recordSetName, RecordSetAdapter recordSet);
+
+    RecordSetAdapter getRecordSet(String recordSetName);
+
+    Map<String, RecordSetAdapter> getRecordSetMap();
+
     void addRow(String recordSetName, Map<String, Object> row);
 
     List<Map<String, Object>> getRows(String recordSetName);

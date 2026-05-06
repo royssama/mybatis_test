@@ -178,14 +178,20 @@ public class DynamicQueryService {
 
     public IDataSet toRecordDataSet(List<Map<String, Object>> sList) {
         IDataSet record = new DataSet();
+        record.putRecordSet("records", toRecordSet(sList));
+        return record;
+    }
+
+    public IRecordSet toRecordSet(List<Map<String, Object>> sList) {
+        IRecordSet recordSet = new RecordSet("records");
         for (Map<String, Object> sourceRow : sList) {
             Map<String, String> row = new LinkedHashMap<>();
             for (Map.Entry<String, Object> entry : sourceRow.entrySet()) {
                 row.put(entry.getKey(), entry.getValue() == null ? null : String.valueOf(entry.getValue()));
             }
-            record.addRow("records", row);
+            recordSet.addRow(row);
         }
-        return record;
+        return recordSet;
     }
 
     public <T> T toDto(IDataSet req, Class<T> dtoType) {

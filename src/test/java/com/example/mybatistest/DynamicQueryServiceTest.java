@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import nexcore.framework.core.data.DataSet;
 import nexcore.framework.core.data.IDataSet;
+import nexcore.framework.core.data.IRecordSet;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -160,6 +161,22 @@ class DynamicQueryServiceTest {
         assertThat(record.getRecord(0)).containsEntry("test001", "A");
         assertThat(record.getRecord(0)).containsEntry("test002", "B");
         assertThat(record.getRecord(1)).containsEntry("test001", "C");
+    }
+
+    @Test
+    void convertsListMapResultToIRecordSet() {
+        List<Map<String, Object>> sList = List.of(
+                Map.of("test001", "A", "test002", "B"),
+                Map.of("test001", "C", "test002", "D")
+        );
+
+        IRecordSet sRecord = dynamicQueryService.toRecordSet(sList);
+
+        assertThat(sRecord.getName()).isEqualTo("records");
+        assertThat(sRecord.getRowCount()).isEqualTo(2);
+        assertThat(sRecord.getRows().get(0)).containsEntry("test001", "A");
+        assertThat(sRecord.getRows().get(0)).containsEntry("test002", "B");
+        assertThat(sRecord.getRows().get(1)).containsEntry("test001", "C");
     }
 
     @Test

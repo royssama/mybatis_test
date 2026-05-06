@@ -19,8 +19,9 @@ public class SimpleIDataSet implements IDataSet {
     }
 
     @Override
-    public Object getField(String name) {
-        return fields.get(name);
+    @SuppressWarnings("unchecked")
+    public <T> T getField(String name) {
+        return (T) fields.get(name);
     }
 
     @Override
@@ -55,19 +56,19 @@ public class SimpleIDataSet implements IDataSet {
     }
 
     @Override
-    public void addRow(String recordSetName, Map<String, Object> row) {
+    public void addRow(String recordSetName, Map<String, String> row) {
         recordSets.computeIfAbsent(recordSetName, RecordSet::new).addRow(row);
     }
 
     @Override
-    public List<Map<String, Object>> getRows(String recordSetName) {
+    public List<Map<String, String>> getRows(String recordSetName) {
         IRecordSet recordSet = recordSets.get(recordSetName);
         return recordSet == null ? List.of() : recordSet.getRows();
     }
 
     @Override
-    public Map<String, List<Map<String, Object>>> getRecordSets() {
-        Map<String, List<Map<String, Object>>> rowsByName = new LinkedHashMap<>();
+    public Map<String, List<Map<String, String>>> getRecordSets() {
+        Map<String, List<Map<String, String>>> rowsByName = new LinkedHashMap<>();
         for (Map.Entry<String, IRecordSet> entry : recordSets.entrySet()) {
             rowsByName.put(entry.getKey(), entry.getValue().getRows());
         }
@@ -80,7 +81,7 @@ public class SimpleIDataSet implements IDataSet {
     }
 
     @Override
-    public Map<String, Object> getRecord(int index) {
+    public Map<String, String> getRecord(int index) {
         IRecordSet recordSet = getDefaultRecordSet()
                 .orElseThrow(() -> new IndexOutOfBoundsException("No record set exists"));
         return recordSet.getRows().get(index);

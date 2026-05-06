@@ -7,7 +7,7 @@ import java.util.Map;
 public class MapRecordSetAdapter implements RecordSetAdapter {
 
     private final String name;
-    private final List<Map<String, Object>> rows = new ArrayList<>();
+    private final List<Map<String, String>> rows = new ArrayList<>();
 
     public MapRecordSetAdapter(String name) {
         this.name = name;
@@ -19,12 +19,12 @@ public class MapRecordSetAdapter implements RecordSetAdapter {
     }
 
     @Override
-    public void addRow(Map<String, Object> row) {
+    public void addRow(Map<String, String> row) {
         rows.add(row);
     }
 
     @Override
-    public List<Map<String, Object>> getRows() {
+    public List<Map<String, String>> getRows() {
         return rows;
     }
 

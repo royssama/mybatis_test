@@ -7,7 +7,10 @@ import com.example.mybatistest.dto.DataSetAdapterResponse;
 import com.example.mybatistest.dto.IDataSetDtoRequest;
 import com.example.mybatistest.dto.IDataSetDtoResponse;
 import com.example.mybatistest.service.DynamicQueryService;
+import java.util.HashMap;
 import java.util.Map;
+import nexcore.framework.core.data.DtaSet;
+import nexcore.framework.core.data.IDataSet;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,7 +53,7 @@ class DynamicQueryServiceTest {
 
         assertThat(response.getFields()).containsEntry("test01", "A");
         assertThat(response.getColumns()).hasSize(4);
-        assertThat(response.getColumns().get(0)).containsEntry("recordIndex", 0);
+        assertThat(response.getColumns().get(0)).containsEntry("recordIndex", "0");
         assertThat(response.getRow()).containsEntry("USERID", "U001");
         assertThat(response.getRow()).containsEntry("STATUSNAME", "ACTIVE");
         assertThat(response.getRow()).containsEntry("SCORE", 100);
@@ -69,9 +72,23 @@ class DynamicQueryServiceTest {
 
         assertThat(response.getFields()).containsEntry("test01", "A");
         assertThat(response.getColumns()).hasSize(3);
-        assertThat(response.getColumns().get(0)).containsEntry("recordIndex", 0);
+        assertThat(response.getColumns().get(0)).containsEntry("recordIndex", "0");
         assertThat(response.getRow()).containsEntry("USERID", "U001");
         assertThat(response.getRow()).containsEntry("STATUSNAME", "INACTIVE");
         assertThat(response.getRow()).doesNotContainKey("SCORE");
+    }
+
+    @Test
+    void dataSetSupportsAsIsStringAssignments() {
+        IDataSet req = new DtaSet();
+        req.putField("test", "A");
+        req.addRow("records", Map.of("test002", "B"));
+
+        String test01 = req.getField("test");
+        Map<String, String> wkMap = new HashMap<>();
+        wkMap.put("test002", req.getRecord(0).get("test002"));
+
+        assertThat(test01).isEqualTo("A");
+        assertThat(wkMap).containsEntry("test002", "B");
     }
 }

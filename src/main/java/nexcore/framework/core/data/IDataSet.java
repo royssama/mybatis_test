@@ -11,7 +11,7 @@ public interface IDataSet {
 
     void putField(String name, Object value);
 
-    Object getField(String name);
+    <T> T getField(String name);
 
     Map<String, Object> getFields();
 
@@ -25,13 +25,13 @@ public interface IDataSet {
 
     Map<String, IRecordSet> getRecordSetMap();
 
-    void addRow(String recordSetName, Map<String, Object> row);
+    void addRow(String recordSetName, Map<String, String> row);
 
-    List<Map<String, Object>> getRows(String recordSetName);
+    List<Map<String, String>> getRows(String recordSetName);
 
-    Map<String, List<Map<String, Object>>> getRecordSets();
+    Map<String, List<Map<String, String>>> getRecordSets();
 
     int getRecordCount();
 
-    Map<String, Object> getRecord(int index);
+    Map<String, String> getRecord(int index);
 }

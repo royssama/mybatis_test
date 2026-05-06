@@ -173,13 +173,13 @@ public class DynamicQueryService {
 
         target.putRecordSet("columns", columns);
         for (int i = 0; i < target.getRecordCount(); i++) {
-            target.getRecord(i).put("recordIndex", i);
+            target.getRecord(i).put("recordIndex", String.valueOf(i));
         }
         return target;
     }
 
-    private Map<String, Object> dataSetColumn(String alias, String expression) {
-        Map<String, Object> row = new LinkedHashMap<>();
+    private Map<String, String> dataSetColumn(String alias, String expression) {
+        Map<String, String> row = new LinkedHashMap<>();
         row.put("alias", alias);
         row.put("expression", expression);
         return row;
@@ -187,13 +187,16 @@ public class DynamicQueryService {
 
     private DatasetDtoRequest toDatasetDtoRequest(IDataSet dataSet) {
         DatasetDtoRequest dto = new DatasetDtoRequest();
-        dto.setTest01(String.valueOf(dataSet.getField("test01")));
-        dto.setTest02(String.valueOf(dataSet.getField("test02")));
-        dto.setTest03(String.valueOf(dataSet.getField("test03")));
+        String test01 = dataSet.getField("test01");
+        String test02 = dataSet.getField("test02");
+        String test03 = dataSet.getField("test03");
+        dto.setTest01(test01);
+        dto.setTest02(test02);
+        dto.setTest03(test03);
 
         List<Map<String, String>> columns = new ArrayList<>();
         for (int i = 0; i < dataSet.getRecordCount(); i++) {
-            Map<String, Object> row = dataSet.getRecord(i);
+            Map<String, String> row = dataSet.getRecord(i);
             columns.add(column(String.valueOf(row.get("alias")), String.valueOf(row.get("expression"))));
         }
         dto.setColumns(columns);
@@ -242,20 +245,23 @@ public class DynamicQueryService {
 
         target.putRecordSet("columns", columns);
         for (int i = 0; i < target.getRecordCount(); i++) {
-            target.getRecord(i).put("recordIndex", i);
+            target.getRecord(i).put("recordIndex", String.valueOf(i));
         }
         return target;
     }
 
     private DatasetDtoRequest toDatasetDtoRequest(DataSetAdapter dataSet) {
         DatasetDtoRequest dto = new DatasetDtoRequest();
-        dto.setTest01(String.valueOf(dataSet.getField("test01")));
-        dto.setTest02(String.valueOf(dataSet.getField("test02")));
-        dto.setTest03(String.valueOf(dataSet.getField("test03")));
+        String test01 = dataSet.getField("test01");
+        String test02 = dataSet.getField("test02");
+        String test03 = dataSet.getField("test03");
+        dto.setTest01(test01);
+        dto.setTest02(test02);
+        dto.setTest03(test03);
 
         List<Map<String, String>> columns = new ArrayList<>();
         for (int i = 0; i < dataSet.getRecordCount(); i++) {
-            Map<String, Object> row = dataSet.getRecord(i);
+            Map<String, String> row = dataSet.getRecord(i);
             columns.add(column(String.valueOf(row.get("alias")), String.valueOf(row.get("expression"))));
         }
         dto.setColumns(columns);

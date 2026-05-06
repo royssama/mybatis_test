@@ -16,8 +16,8 @@ public class MapDataSetAdapter implements DataSetAdapter {
     }
 
     @Override
-    public Object getField(String name) {
-        return fields.get(name);
+    public <T> T getField(String name) {
+        return (T) fields.get(name);
     }
 
     @Override
@@ -52,19 +52,19 @@ public class MapDataSetAdapter implements DataSetAdapter {
     }
 
     @Override
-    public void addRow(String recordSetName, Map<String, Object> row) {
+    public void addRow(String recordSetName, Map<String, String> row) {
         recordSets.computeIfAbsent(recordSetName, MapRecordSetAdapter::new).addRow(row);
     }
 
     @Override
-    public List<Map<String, Object>> getRows(String recordSetName) {
+    public List<Map<String, String>> getRows(String recordSetName) {
         RecordSetAdapter recordSet = recordSets.get(recordSetName);
         return recordSet == null ? List.of() : recordSet.getRows();
     }
 
     @Override
-    public Map<String, List<Map<String, Object>>> getRecordSets() {
-        Map<String, List<Map<String, Object>>> rowsByName = new LinkedHashMap<>();
+    public Map<String, List<Map<String, String>>> getRecordSets() {
+        Map<String, List<Map<String, String>>> rowsByName = new LinkedHashMap<>();
         for (Map.Entry<String, RecordSetAdapter> entry : recordSets.entrySet()) {
             rowsByName.put(entry.getKey(), entry.getValue().getRows());
         }
@@ -78,7 +78,7 @@ public class MapDataSetAdapter implements DataSetAdapter {
     }
 
     @Override
-    public Map<String, Object> getRecord(int index) {
+    public Map<String, String> getRecord(int index) {
         RecordSetAdapter recordSet = firstRecordSet();
         if (recordSet == null) {
             throw new IndexOutOfBoundsException("No record set exists");

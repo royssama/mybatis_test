@@ -7,7 +7,7 @@ import java.util.Map;
 public class RecordSet implements IRecordSet {
 
     private final String name;
-    private final List<Map<String, Object>> rows = new ArrayList<>();
+    private final List<Map<String, String>> rows = new ArrayList<>();
 
     public RecordSet(String name) {
         this.name = name;
@@ -19,12 +19,12 @@ public class RecordSet implements IRecordSet {
     }
 
     @Override
-    public void addRow(Map<String, Object> row) {
+    public void addRow(Map<String, String> row) {
         rows.add(row);
     }
 
     @Override
-    public List<Map<String, Object>> getRows() {
+    public List<Map<String, String>> getRows() {
         return rows;
     }
 

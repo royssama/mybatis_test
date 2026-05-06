@@ -10,6 +10,6 @@ import lombok.Setter;
 public class DataSetAdapterResponse {
 
     private Map<String, Object> fields;
-    private List<Map<String, Object>> columns;
+    private List<Map<String, String>> columns;
     private Map<String, Object> row;
 }

@@ -7,9 +7,9 @@ public interface RecordSetAdapter {
 
     String getName();
 
-    void addRow(Map<String, Object> row);
+    void addRow(Map<String, String> row);
 
-    List<Map<String, Object>> getRows();
+    List<Map<String, String>> getRows();
 
     int getRowCount();
 }

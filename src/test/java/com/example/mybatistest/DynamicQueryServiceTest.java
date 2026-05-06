@@ -50,6 +50,7 @@ class DynamicQueryServiceTest {
 
         assertThat(response.getFields()).containsEntry("test01", "A");
         assertThat(response.getColumns()).hasSize(4);
+        assertThat(response.getColumns().get(0)).containsEntry("recordIndex", 0);
         assertThat(response.getRow()).containsEntry("USERID", "U001");
         assertThat(response.getRow()).containsEntry("STATUSNAME", "ACTIVE");
         assertThat(response.getRow()).containsEntry("SCORE", 100);
@@ -68,6 +69,7 @@ class DynamicQueryServiceTest {
 
         assertThat(response.getFields()).containsEntry("test01", "A");
         assertThat(response.getColumns()).hasSize(3);
+        assertThat(response.getColumns().get(0)).containsEntry("recordIndex", 0);
         assertThat(response.getRow()).containsEntry("USERID", "U001");
         assertThat(response.getRow()).containsEntry("STATUSNAME", "INACTIVE");
         assertThat(response.getRow()).doesNotContainKey("SCORE");

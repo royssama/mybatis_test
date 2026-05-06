@@ -29,6 +29,17 @@ public class SimpleIDataSet implements IDataSet {
     }
 
     @Override
+    public Map<String, Object> getFieldMap() {
+        return fields;
+    }
+
+    @Override
+    public void putFieldMap(Map<String, Object> fieldMap) {
+        fields.clear();
+        fields.putAll(fieldMap);
+    }
+
+    @Override
     public void putRecordSet(String recordSetName, IRecordSet recordSet) {
         recordSets.put(recordSetName, recordSet);
     }
@@ -61,5 +72,27 @@ public class SimpleIDataSet implements IDataSet {
             rowsByName.put(entry.getKey(), entry.getValue().getRows());
         }
         return rowsByName;
+    }
+
+    @Override
+    public int getRecordCount() {
+        return getDefaultRecordSet().map(IRecordSet::getRowCount).orElse(0);
+    }
+
+    @Override
+    public Map<String, Object> getRecord(int index) {
+        IRecordSet recordSet = getDefaultRecordSet()
+                .orElseThrow(() -> new IndexOutOfBoundsException("No record set exists"));
+        return recordSet.getRows().get(index);
+    }
+
+    private java.util.Optional<IRecordSet> getDefaultRecordSet() {
+        if (recordSets.containsKey("records")) {
+            return java.util.Optional.of(recordSets.get("records"));
+        }
+        if (recordSets.containsKey("columns")) {
+            return java.util.Optional.of(recordSets.get("columns"));
+        }
+        return recordSets.values().stream().findFirst();
     }
 }

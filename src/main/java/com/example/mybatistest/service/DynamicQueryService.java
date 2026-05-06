@@ -156,11 +156,12 @@ public class DynamicQueryService {
 
     private IDataSet runLegacyIDataSetLogic(IOnlineContext context, IDataSet source) {
         IDataSet target = new DtaSet();
-        target.getFields().putAll(source.getFields());
-        target.putField("transactionId", context.getAttribute("transactionId"));
+        Map<String, Object> paramMap = new LinkedHashMap<>(source.getFieldMap());
+        paramMap.put("transactionId", context.getAttribute("transactionId"));
+        target.putFieldMap(paramMap);
 
-        boolean active = Boolean.TRUE.equals(source.getField("active"));
-        boolean includeScore = Boolean.TRUE.equals(source.getField("includeScore"));
+        boolean active = Boolean.TRUE.equals(paramMap.get("active"));
+        boolean includeScore = Boolean.TRUE.equals(paramMap.get("includeScore"));
         IRecordSet columns = new RecordSet("columns");
         columns.addRow(dataSetColumn("userId", "'U001'"));
         columns.addRow(dataSetColumn("userName", "'Test User'"));
@@ -171,6 +172,9 @@ public class DynamicQueryService {
         }
 
         target.putRecordSet("columns", columns);
+        for (int i = 0; i < target.getRecordCount(); i++) {
+            target.getRecord(i).put("recordIndex", i);
+        }
         return target;
     }
 
@@ -188,7 +192,8 @@ public class DynamicQueryService {
         dto.setTest03(String.valueOf(dataSet.getField("test03")));
 
         List<Map<String, String>> columns = new ArrayList<>();
-        for (Map<String, Object> row : dataSet.getRows("columns")) {
+        for (int i = 0; i < dataSet.getRecordCount(); i++) {
+            Map<String, Object> row = dataSet.getRecord(i);
             columns.add(column(String.valueOf(row.get("alias")), String.valueOf(row.get("expression"))));
         }
         dto.setColumns(columns);
@@ -220,11 +225,12 @@ public class DynamicQueryService {
 
     private DataSetAdapter runAdapterDataSetLogic(OnlineContextAdapter context, DataSetAdapter source) {
         DataSetAdapter target = new MapDtaSetAdapter();
-        target.getFields().putAll(source.getFields());
-        target.putField("transactionId", context.getAttribute("transactionId"));
+        Map<String, Object> paramMap = new LinkedHashMap<>(source.getFieldMap());
+        paramMap.put("transactionId", context.getAttribute("transactionId"));
+        target.putFieldMap(paramMap);
 
-        boolean active = Boolean.TRUE.equals(source.getField("active"));
-        boolean includeScore = Boolean.TRUE.equals(source.getField("includeScore"));
+        boolean active = Boolean.TRUE.equals(paramMap.get("active"));
+        boolean includeScore = Boolean.TRUE.equals(paramMap.get("includeScore"));
         RecordSetAdapter columns = new MapRecordSetAdapter("columns");
         columns.addRow(dataSetColumn("userId", "'U001'"));
         columns.addRow(dataSetColumn("userName", "'Test User'"));
@@ -235,6 +241,9 @@ public class DynamicQueryService {
         }
 
         target.putRecordSet("columns", columns);
+        for (int i = 0; i < target.getRecordCount(); i++) {
+            target.getRecord(i).put("recordIndex", i);
+        }
         return target;
     }
 
@@ -245,7 +254,8 @@ public class DynamicQueryService {
         dto.setTest03(String.valueOf(dataSet.getField("test03")));
 
         List<Map<String, String>> columns = new ArrayList<>();
-        for (Map<String, Object> row : dataSet.getRows("columns")) {
+        for (int i = 0; i < dataSet.getRecordCount(); i++) {
+            Map<String, Object> row = dataSet.getRecord(i);
             columns.add(column(String.valueOf(row.get("alias")), String.valueOf(row.get("expression"))));
         }
         dto.setColumns(columns);

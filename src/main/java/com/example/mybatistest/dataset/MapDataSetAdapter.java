@@ -26,6 +26,17 @@ public class MapDataSetAdapter implements DataSetAdapter {
     }
 
     @Override
+    public Map<String, Object> getFieldMap() {
+        return fields;
+    }
+
+    @Override
+    public void putFieldMap(Map<String, Object> fieldMap) {
+        fields.clear();
+        fields.putAll(fieldMap);
+    }
+
+    @Override
     public void putRecordSet(String recordSetName, RecordSetAdapter recordSet) {
         recordSets.put(recordSetName, recordSet);
     }
@@ -58,5 +69,24 @@ public class MapDataSetAdapter implements DataSetAdapter {
             rowsByName.put(entry.getKey(), entry.getValue().getRows());
         }
         return rowsByName;
+    }
+
+    @Override
+    public int getRecordCount() {
+        RecordSetAdapter recordSet = firstRecordSet();
+        return recordSet == null ? 0 : recordSet.getRowCount();
+    }
+
+    @Override
+    public Map<String, Object> getRecord(int index) {
+        RecordSetAdapter recordSet = firstRecordSet();
+        if (recordSet == null) {
+            throw new IndexOutOfBoundsException("No record set exists");
+        }
+        return recordSet.getRows().get(index);
+    }
+
+    private RecordSetAdapter firstRecordSet() {
+        return recordSets.values().stream().findFirst().orElse(null);
     }
 }

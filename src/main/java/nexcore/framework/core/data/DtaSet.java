@@ -28,6 +28,17 @@ public class DtaSet implements IDataSet {
     }
 
     @Override
+    public Map<String, Object> getFieldMap() {
+        return fields;
+    }
+
+    @Override
+    public void putFieldMap(Map<String, Object> fieldMap) {
+        fields.clear();
+        fields.putAll(fieldMap);
+    }
+
+    @Override
     public void putRecordSet(String recordSetName, IRecordSet recordSet) {
         recordSets.put(recordSetName, recordSet);
     }
@@ -40,6 +51,18 @@ public class DtaSet implements IDataSet {
     @Override
     public Map<String, IRecordSet> getRecordSetMap() {
         return recordSets;
+    }
+
+    @Override
+    public int getRecordCount() {
+        IRecordSet recordSet = firstRecordSet();
+        return recordSet == null ? 0 : recordSet.getRowCount();
+    }
+
+    @Override
+    public Map<String, Object> getRecord(int index) {
+        IRecordSet recordSet = firstRecordSet();
+        return recordSet == null ? Map.of() : recordSet.getRows().get(index);
     }
 
     @Override
@@ -60,5 +83,9 @@ public class DtaSet implements IDataSet {
             rowsByName.put(entry.getKey(), entry.getValue().getRows());
         }
         return rowsByName;
+    }
+
+    private IRecordSet firstRecordSet() {
+        return recordSets.values().stream().findFirst().orElse(null);
     }
 }

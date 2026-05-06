@@ -14,6 +14,10 @@ public interface DataSetAdapter {
 
     Map<String, Object> getFields();
 
+    Map<String, Object> getFieldMap();
+
+    void putFieldMap(Map<String, Object> fieldMap);
+
     void putRecordSet(String recordSetName, RecordSetAdapter recordSet);
 
     RecordSetAdapter getRecordSet(String recordSetName);
@@ -25,4 +29,8 @@ public interface DataSetAdapter {
     List<Map<String, Object>> getRows(String recordSetName);
 
     Map<String, List<Map<String, Object>>> getRecordSets();
+
+    int getRecordCount();
+
+    Map<String, Object> getRecord(int index);
 }

@@ -56,7 +56,10 @@ public class SimpleIDataSet implements IDataSet {
 
     @Override
     public void addRow(String recordSetName, Map<String, String> row) {
-        recordSets.computeIfAbsent(recordSetName, RecordSet::new).addRow(row);
+        IRecordSet recordSet = recordSets.computeIfAbsent(recordSetName, RecordSet::new);
+        if (recordSet instanceof RecordSet mutableRecordSet) {
+            mutableRecordSet.addRow(row);
+        }
     }
 
     @Override

@@ -10,8 +10,6 @@ public interface IRecordSet {
 
     String getName();
 
-    void addRow(Map<String, String> row);
-
     List<Map<String, String>> getRows();
 
     int getRowCount();

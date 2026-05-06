@@ -178,20 +178,26 @@ public class DynamicQueryService {
 
     public IDataSet toRecordDataSet(List<Map<String, Object>> sList) {
         IDataSet record = new DataSet();
-        record.putRecordSet("records", toRecordSet(sList));
+        for (Map<String, Object> sourceRow : sList) {
+            record.addRow("records", toRecordRow(sourceRow));
+        }
         return record;
     }
 
     public IRecordSet toRecordSet(List<Map<String, Object>> sList) {
-        IRecordSet recordSet = new RecordSet("records");
+        IDataSet record = new DataSet();
         for (Map<String, Object> sourceRow : sList) {
-            Map<String, String> row = new LinkedHashMap<>();
-            for (Map.Entry<String, Object> entry : sourceRow.entrySet()) {
-                row.put(entry.getKey(), entry.getValue() == null ? null : String.valueOf(entry.getValue()));
-            }
-            recordSet.addRow(row);
+            record.addRow("records", toRecordRow(sourceRow));
         }
-        return recordSet;
+        return record.getRecordSet("records");
+    }
+
+    private Map<String, String> toRecordRow(Map<String, Object> sourceRow) {
+        Map<String, String> row = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : sourceRow.entrySet()) {
+            row.put(entry.getKey(), entry.getValue() == null ? null : String.valueOf(entry.getValue()));
+        }
+        return row;
     }
 
     public <T> T toDto(IDataSet req, Class<T> dtoType) {
@@ -251,16 +257,13 @@ public class DynamicQueryService {
 
         boolean active = Boolean.TRUE.equals(paramMap.get("active"));
         boolean includeScore = Boolean.TRUE.equals(paramMap.get("includeScore"));
-        IRecordSet columns = new RecordSet("columns");
-        columns.addRow(dataSetColumn("userId", "'U001'"));
-        columns.addRow(dataSetColumn("userName", "'Test User'"));
-        columns.addRow(dataSetColumn("statusName", active ? "'ACTIVE'" : "'INACTIVE'"));
+        target.addRow("columns", dataSetColumn("userId", "'U001'"));
+        target.addRow("columns", dataSetColumn("userName", "'Test User'"));
+        target.addRow("columns", dataSetColumn("statusName", active ? "'ACTIVE'" : "'INACTIVE'"));
 
         if (includeScore) {
-            columns.addRow(dataSetColumn("score", "100"));
+            target.addRow("columns", dataSetColumn("score", "100"));
         }
-
-        target.putRecordSet("columns", columns);
         for (int i = 0; i < target.getRecordCount(); i++) {
             target.getRecord(i).put("recordIndex", String.valueOf(i));
         }

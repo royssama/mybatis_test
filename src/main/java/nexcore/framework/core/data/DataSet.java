@@ -69,7 +69,12 @@ public class DataSet implements IDataSet {
 
     @Override
     public void addRow(String recordSetName, Map<String, String> row) {
-        recordSets.computeIfAbsent(recordSetName, RecordSet::new).addRow(row);
+        IRecordSet recordSet = recordSets.computeIfAbsent(recordSetName, RecordSet::new);
+        if (recordSet instanceof RecordSet writableRecordSet) {
+            writableRecordSet.addRow(row);
+            return;
+        }
+        throw new IllegalStateException("RecordSet implementation does not support adding rows");
     }
 
     @Override
